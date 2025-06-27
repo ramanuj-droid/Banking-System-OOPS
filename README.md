@@ -1,2 +1,1 @@
-# Banking-System-OOPS
-This is a simple Banking System using Python OOPS and Streamlit library
+This is a simple yet complete banking system project built using Object-Oriented Programming (OOP) concepts in Python. It supports both a command-line interface (CLI) and a Streamlit-based graphical user interface (GUI).
