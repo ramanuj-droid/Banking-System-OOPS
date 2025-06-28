@@ -108,6 +108,7 @@ elif menu == "📊 View Balance":
     if user in st.session_state["accounts"]:
         acc = st.session_state["accounts"][user]
         st.info(f"👤 Name: {acc.owner}")
+        st.info(f"🆔 Account Number: {acc.account_number}")
         st.info(f"💰 Balance: ₹{acc.balance}")
         st.info(f"🏦 Type: {acc.account_type()}")
     else:
