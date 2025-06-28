@@ -92,7 +92,7 @@ if st.session_state["user"] is None:
 
     if auth_mode == "Signup":
         if st.button("Register"):
-            success, message = auth.signup(username, password)
+            success, message = Auth.signup(username, password)
             if success:
                 st.success(message)
             else:
@@ -100,7 +100,7 @@ if st.session_state["user"] is None:
 
     else:  # Login
         if st.button("Login"):
-            success, message = auth.login(username, password)
+            success, message = Auth.login(username, password)
             if success:
                 st.session_state["user"] = username
                 st.success(f"Welcome, {username}!")
