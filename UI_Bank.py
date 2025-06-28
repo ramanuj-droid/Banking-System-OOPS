@@ -78,3 +78,31 @@ elif menu == "📊 View Balance":
             st.info(f"🏦 Type: {acc.account_type()}")
         else:
             st.error("Account not found.")
+f "user" not in st.session_state:
+    st.session_state["user"] = None
+
+if st.session_state["user"] is None:
+    st.title("🔐 Login to Python Bank")
+
+    auth_mode = st.radio("Choose action", ["Login", "Signup"])
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if auth_mode == "Signup":
+        if st.button("Register"):
+            success, message = Auth.signup(username, password)
+            if success:
+                st.success(message)
+            else:
+                st.error(message)
+
+    else:  # Login
+        if st.button("Login"):
+            success, message = Auth.login(username, password)
+            if success:
+                st.session_state["user"] = username
+                st.success(f"Welcome, {username}!")
+                st.experimental_rerun()
+            else:
+                st.error(message)
+    st.stop()
