@@ -78,10 +78,12 @@ elif menu == "📊 View Balance":
             st.info(f"🏦 Type: {acc.account_type()}")
         else:
             st.error("Account not found.")
-f "user" not in st.session_state:
-    st.session_state["users"] = None
+st.set_page_config(page_title="Python Bank", page_icon="🏦")
 
-if st.session_state["users"] is None:
+if "user" not in st.session_state:
+    st.session_state["user"] = None
+
+if st.session_state["user"] is None:
     st.title("🔐 Login to Python Bank")
 
     auth_mode = st.radio("Choose action", ["Login", "Signup"])
@@ -90,7 +92,7 @@ if st.session_state["users"] is None:
 
     if auth_mode == "Signup":
         if st.button("Register"):
-            success, message = Auth.signup(username, password)
+            success, message = auth.signup(username, password)
             if success:
                 st.success(message)
             else:
@@ -98,11 +100,11 @@ if st.session_state["users"] is None:
 
     else:  # Login
         if st.button("Login"):
-            success, message = Auth.login(username, password)
+            success, message = auth.login(username, password)
             if success:
-                st.session_state["users"] = username
+                st.session_state["user"] = username
                 st.success(f"Welcome, {username}!")
-                st.experimental_rerun()
+                st.experimental_rerun()  # Refresh to load main UI
             else:
                 st.error(message)
     st.stop()
