@@ -11,8 +11,8 @@ if "user" not in st.session_state:
     st.session_state["user"] = None
 if "accounts" not in st.session_state:
     st.session_state["accounts"] = {}
-if "transactions" not in st.session_state:
-    st.session_state["transactions"] = {}
+if "transaction" not in st.session_state:
+    st.session_state["transaction"] = {}
 
 # ---------- Auth System ----------
 if st.session_state["user"] is None:
@@ -48,9 +48,9 @@ def log_transaction(account_name, txn_type, amount, balance):
         "Amount": amount,
         "Balance": balance
     }
-    if account_name not in st.session_state["transactions"]:
-        st.session_state["transactions"][account_name] = []
-    st.session_state["transactions"][account_name].append(txn)
+    if account_name not in st.session_state["transaction"]:
+        st.session_state["transaction"][account_name] = []
+    st.session_state["transaction"][account_name].append(txn)
 
 # ---------- Sidebar Menu ----------
 menu = st.sidebar.selectbox("Select Action", [
@@ -135,7 +135,7 @@ elif menu == "📊 View Balance":
 
 # ---------- Menu: Transaction History ----------
 if st.button("View History"):
-    txns = st.session_state["transactions"].get(name, [])
+    txns = st.session_state["transaction"].get(name, [])
     if txns:
         import pandas as pd
         df = pd.DataFrame(txns)
