@@ -78,7 +78,7 @@ elif menu == "📊 View Balance":
             st.info(f"🏦 Type: {acc.account_type()}")
         else:
             st.error("Account not found.")
-st.set_page_config(page_title="Python Bank", page_icon="🏦")
+st.set_page_config(page_title="Savitr Bank", page_icon="🏦")
 
 if "user" not in st.session_state:
     st.session_state["user"] = None
@@ -104,7 +104,7 @@ if st.session_state["user"] is None:
             if success:
                 st.session_state["user"] = username
                 st.success(f"Welcome, {username}!")
-                st.experimental_rerun()  # Refresh to load main UI
+                st.rerun()
             else:
                 st.error(message)
     st.stop()
