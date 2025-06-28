@@ -134,13 +134,15 @@ elif menu == "📊 View Balance":
             st.error("Account not found.")
 
 # ---------- Menu: Transaction History ----------
-elif menu == "📜 Transaction History":
-    st.subheader("📜 Transaction History")
-    name = st.text_input("Enter account name to view transactions")
+if st.button("View History"):
+    txns = st.session_state["transactions"].get(name, [])
+    if txns:
+        import pandas as pd
+        df = pd.DataFrame(txns)
+        st.dataframe(df, use_container_width=True)
 
-    if st.button("View History"):
-        txns = st.session_state["transactions"].get(name, [])
-        if txns:
-            st.dataframe(txns, use_container_width=True)
-        else:
-            st.warning("No transactions found for this account.")
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇️ Download Statement", csv, file_name="statement.csv", mime="text/csv")
+    else:
+        st.warning("No transactions found for this account.")
+
