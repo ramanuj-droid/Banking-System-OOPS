@@ -12,12 +12,7 @@ class Account:
 
     def account_type(self):
         return "Generic"
-
-class Account(ABC):
-    def __init__(self,owner,balance =0):
-        self.__owner=owner
-        self.__balance = balance
-
+        
     @property
     def owner(self):
         return self.__owner
