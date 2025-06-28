@@ -1,8 +1,8 @@
 import streamlit as st
 from account import SavingsAccount, CurrentAccount
-from transaction import TransactionManager
+from transaction import TransactionManager, log_transaction
 import Auth
-import datetime
+import pandas as pd
 
 st.set_page_config(page_title="Savitr Bank", page_icon="🏦")
 
@@ -11,10 +11,10 @@ if "user" not in st.session_state:
     st.session_state["user"] = None
 if "accounts" not in st.session_state:
     st.session_state["accounts"] = {}
-if "transaction" not in st.session_state:
-    st.session_state["transaction"] = {}
+if "transactions" not in st.session_state:
+    st.session_state["transactions"] = {}
 
-# ---------- Auth System ----------
+# ---------- Auth ----------
 if st.session_state["user"] is None:
     st.title("🔐 Login to Savitr Bank")
 
@@ -25,10 +25,8 @@ if st.session_state["user"] is None:
     if auth_mode == "Signup":
         if st.button("Register"):
             success, message = Auth.signup(username, password)
-            if success:
-                st.success(message)
-            else:
-                st.error(message)
+            st.success(message) if success else st.error(message)
+
     else:
         if st.button("Login"):
             success, message = Auth.login(username, password)
@@ -40,109 +38,92 @@ if st.session_state["user"] is None:
                 st.error(message)
     st.stop()
 
-# ---------- Transaction Logger ----------
-def log_transaction(account_name, txn_type, amount, balance):
-    txn = {
-        "Date/Time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "Type": txn_type,
-        "Amount": amount,
-        "Balance": balance
-    }
-    if account_name not in st.session_state["transaction"]:
-        st.session_state["transaction"][account_name] = []
-    st.session_state["transaction"][account_name].append(txn)
-
-# ---------- Sidebar Menu ----------
+# ---------- Sidebar ----------
 menu = st.sidebar.selectbox("Select Action", [
-    "🏠 Home", "➕ Create Account", "💰 Deposit", "💸 Withdraw", 
+    "🏠 Home", "➕ Create Account", "💰 Deposit", "💸 Withdraw",
     "📊 View Balance", "📜 Transaction History"
 ])
 
 st.title("🏦 Savitr OOP Bank")
+user = st.session_state["user"]
 
-# ---------- Menu: Home ----------
+# ---------- Home ----------
 if menu == "🏠 Home":
     st.write("Welcome to the Savitr Bank built with OOP and Streamlit!")
-    st.write("Use the sidebar to navigate.")
 
-# ---------- Menu: Create Account ----------
+# ---------- Create Account ----------
 elif menu == "➕ Create Account":
     st.subheader("Create New Account")
-    name = st.text_input("Enter your name")
     acc_type = st.selectbox("Account Type", ["Savings", "Current"])
     balance = st.number_input("Initial Deposit", min_value=0.0)
 
     if st.button("Create Account"):
-        if name in st.session_state['accounts']:
+        if user in st.session_state["accounts"]:
             st.warning("Account already exists!")
         else:
             if acc_type == "Savings":
-                acc = SavingsAccount(name, balance)
+                acc = SavingsAccount(user, balance)
             else:
-                acc = CurrentAccount(name, balance)
-            st.session_state['accounts'][name] = acc
-            st.success(f"{acc_type} account created for {name}!")
+                acc = CurrentAccount(user, balance)
+            st.session_state["accounts"][user] = acc
+            st.success(f"{acc_type} account created!")
 
-# ---------- Menu: Deposit ----------
+# ---------- Deposit ----------
 elif menu == "💰 Deposit":
     st.subheader("Deposit Money")
-    name = st.text_input("Account Name")
-    amount = st.number_input("Deposit Amount", min_value=0.0)
+    amount = st.number_input("Amount to Deposit", min_value=0.0)
 
     if st.button("Deposit"):
-        accs = st.session_state['accounts']
-        if name in accs:
-            tm = TransactionManager(accs[name])
-            tm.deposit(amount)
-            log_transaction(name, "Deposit", amount, accs[name].balance)
-            st.success(f"{amount} was deposited")
+        if user in st.session_state["accounts"]:
+            acc = st.session_state["accounts"][user]
+            tm = TransactionManager(acc)
+            msg = tm.deposit(amount)
+            log_transaction(user, "Deposit", amount, acc.balance, st.session_state)
+            st.success(msg)
         else:
-            st.error("Account not found.")
+            st.error("Account not found. Please create one.")
 
-# ---------- Menu: Withdraw ----------
+# ---------- Withdraw ----------
 elif menu == "💸 Withdraw":
     st.subheader("Withdraw Money")
-    name = st.text_input("Account Name")
-    amount = st.number_input("Withdrawal Amount", min_value=0.0)
+    amount = st.number_input("Amount to Withdraw", min_value=0.0)
 
     if st.button("Withdraw"):
-        accs = st.session_state['accounts']
-        if name in accs:
-            tm = TransactionManager(accs[name])
-            message = tm.withdraw(amount)
-            if "✅" in message:
-                log_transaction(name, "Withdraw", amount, accs[name].balance)
-                st.success(message)
+        if user in st.session_state["accounts"]:
+            acc = st.session_state["accounts"][user]
+            tm = TransactionManager(acc)
+            msg = tm.withdraw(amount)
+            if "✅" in msg:
+                log_transaction(user, "Withdraw", amount, acc.balance, st.session_state)
+                st.success(msg)
             else:
-                st.error(message)
+                st.error(msg)
         else:
-            st.error("Account not found.")
+            st.error("Account not found. Please create one.")
 
-# ---------- Menu: View Balance ----------
+# ---------- View Balance ----------
 elif menu == "📊 View Balance":
-    st.subheader("Account Details")
-    name = st.text_input("Enter account name")
+    st.subheader("Account Info")
 
-    if st.button("Show Info"):
-        accs = st.session_state['accounts']
-        if name in accs:
-            acc = accs[name]
-            st.info(f"👤 Name: {acc.owner}")
-            st.info(f"💰 Balance: ₹{acc.balance}")
-            st.info(f"🏦 Type: {acc.account_type()}")
-        else:
-            st.error("Account not found.")
+    if user in st.session_state["accounts"]:
+        acc = st.session_state["accounts"][user]
+        st.info(f"👤 Name: {acc.owner}")
+        st.info(f"💰 Balance: ₹{acc.balance}")
+        st.info(f"🏦 Type: {acc.account_type()}")
+    else:
+        st.error("No account found.")
 
-# ---------- Menu: Transaction History ----------
-if st.button("View History"):
-    txns = st.session_state["transaction"].get(name, [])
+# ---------- Transaction History ----------
+elif menu == "📜 Transaction History":
+    st.subheader("📜 Transaction History")
+
+    txns = st.session_state["transactions"].get(user, [])
     if txns:
-        import pandas as pd
         df = pd.DataFrame(txns)
         st.dataframe(df, use_container_width=True)
 
+        # Export to CSV
         csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇️ Download Statement", csv, file_name="statement.csv", mime="text/csv")
+        st.download_button("⬇️ Download Statement", csv, "statement.csv", "text/csv")
     else:
-        st.warning("No transactions found for this account.")
-
+        st.warning("No transactions yet.")
