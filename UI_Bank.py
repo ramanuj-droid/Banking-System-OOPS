@@ -55,6 +55,7 @@ if menu == "🏠 Home":
 elif menu == "➕ Create Account":
     st.subheader("Create New Account")
     st.write("Enter Your Name")
+    st.text_input("Enter")
     acc_type = st.selectbox("Account Type", ["Savings", "Current"])
     balance = st.number_input("Initial Deposit", min_value=0.0)
 
