@@ -1,4 +1,17 @@
 from abc import ABC, abstractmethod
+import random
+
+class Account:
+    def __init__(self, owner, balance=0.0):
+        self.owner = owner
+        self.balance = balance
+        self.account_number = self._generate_account_number()
+
+    def _generate_account_number(self):
+        return f"SAV-{random.randint(100000, 999999)}"
+
+    def account_type(self):
+        return "Generic"
 
 class Account(ABC):
     def __init__(self,owner,balance =0):
@@ -45,17 +58,3 @@ class SavingsAccount(Account):
 class CurrentAccount(Account):
     def account_type(self):
         return "Current Account"
-        
-import random
-
-class Account:
-    def __init__(self, owner, balance=0.0):
-        self.owner = owner
-        self.balance = balance
-        self.account_number = self._generate_account_number()
-
-    def _generate_account_number(self):
-        return f"SAV-{random.randint(100000, 999999)}"
-
-    def account_type(self):
-        return "Generic"
