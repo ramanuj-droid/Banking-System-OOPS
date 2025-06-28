@@ -41,7 +41,7 @@ if st.session_state["user"] is None:
 # ---------- Sidebar ----------
 menu = st.sidebar.selectbox("Select Action", [
     "🏠 Home", "➕ Create Account", "💰 Deposit", "💸 Withdraw",
-    "📊 View Balance", "📜 Transaction History"
+    "📊 View Balance",📈 Interest & Insights, "📜 Transaction History"
 ])
 
 st.title("🏦 Savitr OOP Bank")
@@ -121,9 +121,47 @@ elif menu == "📜 Transaction History":
     if txns:
         df = pd.DataFrame(txns)
         st.dataframe(df, use_container_width=True)
-
-        # Export to CSV
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button("⬇️ Download Statement", csv, "statement.csv", "text/csv")
     else:
         st.warning("No transactions yet.")
+elif menu == "📈 Interest & Insights":
+    st.subheader("📈 Interest Calculator and Balance Projection")
+
+    if user not in st.session_state["accounts"]:
+        st.error("No account found. Please create one.")
+    else:
+        acc = st.session_state["accounts"][user]
+
+        st.markdown("### 🔢 Calculate Interest")
+        rate = st.slider("Annual Interest Rate (%)", 1.0, 10.0, 4.0)
+        years = st.slider("Number of Years", 1, 10, 3)
+
+        # Simple Interest Formula
+        principal = acc.balance
+        interest = (principal * rate * years) / 100
+        total_amount = principal + interest
+
+        st.info(f"💰 Principal: ₹{principal}")
+        st.info(f"📈 Interest: ₹{interest:.2f}")
+        st.success(f"📊 Total after {years} years: ₹{total_amount:.2f}")
+
+        # 📊 Graph: Balance Over Years
+        import pandas as pd
+        import altair as alt
+
+        data = pd.DataFrame({
+            "Year": list(range(1, years + 1)),
+            "Balance": [principal + (principal * rate * y) / 100 for y in range(1, years + 1)]
+        })
+
+        chart = alt.Chart(data).mark_line(point=True).encode(
+            x="Year",
+            y="Balance"
+        ).properties(
+            width=600,
+            height=400,
+            title="📈 Projected Balance Over Time"
+        )
+
+        st.altair_chart(chart, use_container_width=True)
