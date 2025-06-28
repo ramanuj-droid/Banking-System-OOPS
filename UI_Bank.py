@@ -1,7 +1,7 @@
 import streamlit as st
 from account import SavingsAccount, CurrentAccount
 from transaction import TransactionManager
-
+import Auth
 st.set_page_config(page_title="Savitr Bank", page_icon="🏦")
 
 # Initialize session state
@@ -79,9 +79,9 @@ elif menu == "📊 View Balance":
         else:
             st.error("Account not found.")
 f "user" not in st.session_state:
-    st.session_state["user"] = None
+    st.session_state["users"] = None
 
-if st.session_state["user"] is None:
+if st.session_state["users"] is None:
     st.title("🔐 Login to Python Bank")
 
     auth_mode = st.radio("Choose action", ["Login", "Signup"])
@@ -100,7 +100,7 @@ if st.session_state["user"] is None:
         if st.button("Login"):
             success, message = Auth.login(username, password)
             if success:
-                st.session_state["user"] = username
+                st.session_state["users"] = username
                 st.success(f"Welcome, {username}!")
                 st.experimental_rerun()
             else:
