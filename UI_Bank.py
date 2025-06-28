@@ -41,7 +41,7 @@ if st.session_state["user"] is None:
 # ---------- Sidebar ----------
 menu = st.sidebar.selectbox("Select Action", [
     "🏠 Home", "➕ Create Account", "💰 Deposit", "💸 Withdraw",
-    "📊 View Balance",📈 Interest & Insights, "📜 Transaction History"
+    "📊 View Balance","📈 Interest & Insights", "📜 Transaction History"
 ])
 
 st.title("🏦 Savitr OOP Bank")
